@@ -21,12 +21,52 @@
     </div>
 
     <!-- Add Task Form -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-sidebar-border/70">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-        Add New Task
-      </h2>
-      
-      <form @submit.prevent="submitTask" class="space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-sidebar-border/70">
+      <!-- Collapsible Header -->
+      <button
+        @click="isAddFormOpen = !isAddFormOpen"
+        class="w-full p-6 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors rounded-lg"
+        type="button"
+      >
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Add New Task
+          </h2>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+              {{ isAddFormOpen ? 'Hide form' : 'Click to add task' }}
+            </span>
+            <kbd class="hidden sm:inline-flex px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-100 border border-gray-300 rounded dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600">
+              Ctrl+N
+            </kbd>
+            <svg 
+              class="w-5 h-5 text-gray-500 dark:text-gray-400 transform transition-transform duration-200"
+              :class="{ 'rotate-180': isAddFormOpen }"
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </button>
+
+      <!-- Collapsible Form Content -->
+      <Transition
+        enter-active-class="transition-all duration-300 ease-in-out"
+        enter-from-class="opacity-0 max-h-0"
+        enter-to-class="opacity-100 max-h-[1000px]"
+        leave-active-class="transition-all duration-300 ease-in-out"
+        leave-from-class="opacity-100 max-h-[1000px]"
+        leave-to-class="opacity-0 max-h-0"
+      >
+        <div 
+          v-show="isAddFormOpen"
+          class="border-t border-gray-200 dark:border-gray-700 overflow-hidden"
+        >
+          <div class="p-6">
+          <form @submit.prevent="submitTask" class="space-y-4">
         <div>
           <Label for="title" class="mb-2 block">Title</Label>
           <Input
@@ -78,12 +118,15 @@
           </div>
         </div>
 
-        <div class="flex justify-end">
-          <Button type="submit">
-            Add Task
-          </Button>
+            <div class="flex justify-end">
+              <Button type="submit">
+                Add Task
+              </Button>
+            </div>
+          </form>
+          </div>
         </div>
-      </form>
+      </Transition>
     </div>
 
     <!-- Filter and Sort Controls -->
@@ -186,7 +229,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTaskStore } from '@/stores';
 import Button from '@/components/ui/button/Button.vue';
 import Input from '@/components/ui/input/Input.vue';
@@ -221,11 +264,42 @@ const taskStore = useTaskStore();
 // Initialize store with props data
 onMounted(() => {
   taskStore.initializeTasks(props.tasks, props.priorityOptions);
+  
+  // Add keyboard shortcut for opening add form
+  document.addEventListener('keydown', handleKeydown);
 });
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown);
+});
+
+const handleKeydown = (event: KeyboardEvent) => {
+  // Ctrl+N or Cmd+N to open/close add form
+  if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
+    event.preventDefault();
+    isAddFormOpen.value = !isAddFormOpen.value;
+    
+    // Focus on title input if opening
+    if (isAddFormOpen.value) {
+      setTimeout(() => {
+        const titleInput = document.getElementById('title');
+        titleInput?.focus();
+      }, 100);
+    }
+  }
+};
 
 const today = computed(() => {
   return new Date().toISOString().split('T')[0];
 });
+
+const isMac = computed(() => {
+  // Safe check for SSR compatibility
+  if (typeof navigator === 'undefined') return false;
+  return navigator.platform.includes('Mac');
+});
+
+const isAddFormOpen = ref(false);
 
 const form = ref({
   title: '',
@@ -252,13 +326,14 @@ const submitTask = async () => {
       due_date: form.value.due_date || undefined,
     });
     
-    // Reset form
+    // Reset form and close the form
     form.value = {
       title: '',
       description: '',
       priority: 1,
       due_date: '',
     };
+    isAddFormOpen.value = false;
   } catch (error) {
     console.error('Error submitting task:', error);
   }
