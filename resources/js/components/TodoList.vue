@@ -1,0 +1,277 @@
+<template>
+  <div class="space-y-6">
+    <!-- Task Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-sidebar-border/70">
+        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ taskStore.taskStats.total }}</div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Total Tasks</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-sidebar-border/70">
+        <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ taskStore.taskStats.completed }}</div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Completed</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-sidebar-border/70">
+        <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ taskStore.taskStats.incomplete }}</div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Incomplete</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-sidebar-border/70">
+        <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ taskStore.taskStats.overdue }}</div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Overdue</div>
+      </div>
+    </div>
+
+    <!-- Add Task Form -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-sidebar-border/70">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        Add New Task
+      </h2>
+      
+      <form @submit.prevent="submitTask" class="space-y-4">
+        <div>
+          <Label for="title" class="mb-2 block">Title</Label>
+          <Input
+            id="title"
+            v-model="form.title"
+            type="text"
+            placeholder="Enter task title..."
+            required
+          />
+          <InputError :message="formErrors.title" />
+        </div>
+
+        <div>
+          <Label for="description" class="mb-2 block">Description (Optional)</Label>
+          <textarea
+            id="description"
+            v-model="form.description"
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            placeholder="Enter task description..."
+          ></textarea>
+          <InputError :message="formErrors.description" />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label for="priority" class="mb-2 block">Priority</Label>
+                      <select
+            id="priority"
+            v-model="form.priority"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            required
+          >
+            <option v-for="option in taskStore.priorityOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+            <InputError :message="formErrors.priority" />
+          </div>
+
+          <div>
+            <Label for="due_date" class="mb-2 block">Due Date (Optional)</Label>
+            <Input
+              id="due_date"
+              v-model="form.due_date"
+              type="date"
+              :min="today"
+            />
+            <InputError :message="formErrors.due_date" />
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <Button type="submit">
+            Add Task
+          </Button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filter and Sort Controls -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-sidebar-border/70">
+      <div class="flex flex-wrap gap-4 items-center">
+        <div class="flex gap-2">
+          <button
+            @click="taskStore.setFilter('all')"
+            :class="[
+              'px-3 py-1 rounded-md text-sm font-medium transition-colors',
+              taskStore.filter === 'all' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+            ]"
+          >
+            All
+          </button>
+          <button
+            @click="taskStore.setFilter('incomplete')"
+            :class="[
+              'px-3 py-1 rounded-md text-sm font-medium transition-colors',
+              taskStore.filter === 'incomplete' 
+                ? 'bg-yellow-600 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+            ]"
+          >
+            Incomplete
+          </button>
+          <button
+            @click="taskStore.setFilter('completed')"
+            :class="[
+              'px-3 py-1 rounded-md text-sm font-medium transition-colors',
+              taskStore.filter === 'completed' 
+                ? 'bg-green-600 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+            ]"
+          >
+            Completed
+          </button>
+          <button
+            @click="taskStore.setFilter('overdue')"
+            :class="[
+              'px-3 py-1 rounded-md text-sm font-medium transition-colors',
+              taskStore.filter === 'overdue' 
+                ? 'bg-red-600 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+            ]"
+          >
+            Overdue
+          </button>
+        </div>
+        
+        <div class="flex gap-2 items-center">
+          <span class="text-sm text-gray-600 dark:text-gray-400">Sort by:</span>
+          <select
+            v-model="taskStore.sortBy"
+            @change="taskStore.setSorting(taskStore.sortBy, taskStore.sortOrder)"
+            class="px-2 py-1 border border-gray-300 rounded-md text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          >
+            <option value="created_at">Date Created</option>
+            <option value="due_date">Due Date</option>
+            <option value="priority">Priority</option>
+          </select>
+          <button
+            @click="taskStore.setSorting(taskStore.sortBy, taskStore.sortOrder === 'asc' ? 'desc' : 'asc')"
+            class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            :title="taskStore.sortOrder === 'asc' ? 'Sort Descending' : 'Sort Ascending'"
+          >
+            <svg class="w-4 h-4" :class="{ 'rotate-180': taskStore.sortOrder === 'desc' }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks List -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-sidebar-border/70">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        My Tasks ({{ taskStore.filteredTasks.length }})
+      </h2>
+
+      <div v-if="taskStore.filteredTasks.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <p v-if="taskStore.tasks.length === 0">No tasks yet. Add your first task above!</p>
+        <p v-else>No tasks match the current filter.</p>
+      </div>
+
+      <div v-else class="space-y-3">
+        <TodoItem
+          v-for="task in taskStore.filteredTasks"
+          :key="task.id"
+          :task="task"
+          @toggle-complete="taskStore.toggleTaskComplete"
+          @update="handleUpdateTask"
+          @delete="handleDeleteTask"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { useTaskStore } from '@/stores';
+import Button from '@/components/ui/button/Button.vue';
+import Input from '@/components/ui/input/Input.vue';
+import Label from '@/components/ui/label/Label.vue';
+import InputError from '@/components/InputError.vue';
+import TodoItem from '@/components/TodoItem.vue';
+
+interface Task {
+  id: number;
+  title: string;
+  description: string | null;
+  completed: boolean;
+  priority: number;
+  due_date: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PriorityOption {
+  value: number;
+  label: string;
+}
+
+const props = defineProps<{
+  tasks: Task[];
+  priorityOptions: PriorityOption[];
+}>();
+
+const taskStore = useTaskStore();
+
+// Initialize store with props data
+onMounted(() => {
+  taskStore.initializeTasks(props.tasks, props.priorityOptions);
+});
+
+const today = computed(() => {
+  return new Date().toISOString().split('T')[0];
+});
+
+const form = ref({
+  title: '',
+  description: '',
+  priority: 1, // Default to Low priority
+  due_date: '',
+});
+
+const formErrors = ref<{[key: string]: string}>({});
+
+const submitTask = async () => {
+  if (!form.value.title.trim()) {
+    formErrors.value.title = 'Title is required';
+    return;
+  }
+  
+  formErrors.value = {};
+  
+  try {
+    await taskStore.addTask({
+      title: form.value.title,
+      description: form.value.description || undefined,
+      priority: form.value.priority,
+      due_date: form.value.due_date || undefined,
+    });
+    
+    // Reset form
+    form.value = {
+      title: '',
+      description: '',
+      priority: 1,
+      due_date: '',
+    };
+  } catch (error) {
+    console.error('Error submitting task:', error);
+  }
+};
+
+const handleUpdateTask = async (task: Task, data: Partial<Task>) => {
+  await taskStore.updateTask(task.id, data);
+};
+
+const handleDeleteTask = async (task: Task) => {
+  if (confirm('Are you sure you want to delete this task?')) {
+    await taskStore.deleteTask(task.id);
+  }
+};
+</script>
