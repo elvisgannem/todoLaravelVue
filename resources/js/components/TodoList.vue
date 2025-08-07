@@ -73,7 +73,6 @@
               id="due_date"
               v-model="form.due_date"
               type="date"
-              :min="today"
             />
             <InputError :message="formErrors.due_date" />
           </div>

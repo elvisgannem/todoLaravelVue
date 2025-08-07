@@ -18,7 +18,7 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority' => ['required', Rule::enum(Priority::class)],
-            'due_date' => 'nullable|date|after_or_equal:today',
+            'due_date' => 'nullable|date',
         ]);
 
         $request->user()->tasks()->create($validated);
@@ -35,7 +35,7 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority' => ['required', Rule::enum(Priority::class)],
-            'due_date' => 'nullable|date|after_or_equal:today',
+            'due_date' => 'nullable|date',
         ]);
 
         $task->update($validated);
