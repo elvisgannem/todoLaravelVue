@@ -30,9 +30,15 @@ describe('Task Management', function () {
                 'title' => 'Test Task',
                 'description' => 'Test Description',
                 'priority' => Priority::HIGH->value,
-                'due_date' => today()->addDays(3)->format('Y-m-d'),
-                'completed' => false,
             ]);
+
+            // Check date separately to handle different database formats
+            $task = \App\Models\Task::where('user_id', $this->user->id)
+                ->where('title', 'Test Task')
+                ->first();
+            
+            expect($task->due_date->format('Y-m-d'))->toBe(today()->addDays(3)->format('Y-m-d'));
+            expect($task->completed)->toBeFalse();
         });
 
         test('guests cannot create tasks', function () {
@@ -83,8 +89,14 @@ describe('Task Management', function () {
             $this->assertDatabaseHas('tasks', [
                 'user_id' => $this->user->id,
                 'title' => 'Overdue Task',
-                'due_date' => $pastDate,
             ]);
+
+            // Check date separately to handle different database formats
+            $task = \App\Models\Task::where('user_id', $this->user->id)
+                ->where('title', 'Overdue Task')
+                ->first();
+            
+            expect($task->due_date->format('Y-m-d'))->toBe($pastDate);
         });
 
         test('task creation works without optional fields', function () {
@@ -130,8 +142,11 @@ describe('Task Management', function () {
                 'title' => 'Updated Title',
                 'description' => 'Updated Description',
                 'priority' => Priority::HIGH->value,
-                'due_date' => today()->addWeek()->format('Y-m-d'),
             ]);
+
+            // Check date separately to handle different database formats
+            $updatedTask = $task->fresh();
+            expect($updatedTask->due_date->format('Y-m-d'))->toBe(today()->addWeek()->format('Y-m-d'));
         });
 
         test('users cannot update other users tasks', function () {
