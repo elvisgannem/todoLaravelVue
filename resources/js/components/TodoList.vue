@@ -229,7 +229,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useTaskStore } from '@/stores';
 import Button from '@/components/ui/button/Button.vue';
 import Input from '@/components/ui/input/Input.vue';
@@ -289,15 +289,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 };
 
-const today = computed(() => {
-  return new Date().toISOString().split('T')[0];
-});
 
-const isMac = computed(() => {
-  // Safe check for SSR compatibility
-  if (typeof navigator === 'undefined') return false;
-  return navigator.platform.includes('Mac');
-});
 
 const isAddFormOpen = ref(false);
 

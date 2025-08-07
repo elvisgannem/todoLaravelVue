@@ -2,11 +2,8 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import NotificationToast from '../components/NotificationToast.vue';
 import TodoList from '../components/TodoList.vue';
-import { useAppStore } from '@/stores';
-import { storeToRefs } from 'pinia';
 
 interface Task {
     id: number;
@@ -25,7 +22,7 @@ interface PriorityOption {
     label: string;
 }
 
-const props = defineProps<{
+defineProps<{
     tasks: Task[];
     priorityOptions: PriorityOption[];
 }>();
@@ -36,22 +33,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
 ];
-
-const appStore = useAppStore();
-const { isLoading } = storeToRefs(appStore);
-const { setLoading, showSuccess, showError, showWarning, showInfo } = appStore;
-
-const handleTestNotifications = () => {
-    showSuccess('This is a success message!');
-    setTimeout(() => showError('This is an error message!'), 1000);
-    setTimeout(() => showWarning('This is a warning message!'), 2000);
-    setTimeout(() => showInfo('This is an info message!'), 3000);
-};
-
-const handleTestLoading = () => {
-    setLoading(true);
-    setTimeout(() => setLoading(false), 3000);
-};
 </script>
 
 <template>

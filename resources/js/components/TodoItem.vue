@@ -174,10 +174,7 @@ interface Task {
   updated_at: string;
 }
 
-interface PriorityOption {
-  value: number;
-  label: string;
-}
+
 
 const props = defineProps<{
   task: Task;
