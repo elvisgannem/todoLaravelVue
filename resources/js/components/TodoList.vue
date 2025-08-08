@@ -229,7 +229,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useTaskStore } from '@/stores';
 import Button from '@/components/ui/button/Button.vue';
 import Input from '@/components/ui/input/Input.vue';
@@ -265,9 +265,67 @@ const taskStore = useTaskStore();
 onMounted(() => {
   taskStore.initializeTasks(props.tasks, props.priorityOptions);
   
+  // Initialize filters from URL query parameters
+  initializeFiltersFromURL();
+  
   // Add keyboard shortcut for opening add form
   document.addEventListener('keydown', handleKeydown);
 });
+
+// Initialize filters from URL query parameters
+const initializeFiltersFromURL = () => {
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+  
+  // Set filter from URL
+  const filterParam = params.get('filter');
+  if (filterParam && ['all', 'completed', 'incomplete', 'overdue'].includes(filterParam)) {
+    taskStore.setFilter(filterParam as any);
+  }
+  
+  // Set sort parameters from URL
+  const sortBy = params.get('sortBy');
+  const sortOrder = params.get('sortOrder');
+  
+  if (sortBy && ['created_at', 'due_date', 'priority'].includes(sortBy)) {
+    const order = sortOrder === 'asc' ? 'asc' : 'desc';
+    taskStore.setSorting(sortBy as any, order);
+  }
+};
+
+// Update URL when filters change
+const updateURL = (filter: string, sortBy: string, sortOrder: string) => {
+  const url = new URL(window.location.href);
+  
+  // Update query parameters
+  if (filter !== 'all') {
+    url.searchParams.set('filter', filter);
+  } else {
+    url.searchParams.delete('filter');
+  }
+  
+  if (sortBy !== 'created_at') {
+    url.searchParams.set('sortBy', sortBy);
+  } else {
+    url.searchParams.delete('sortBy');
+  }
+  
+  if (sortOrder !== 'desc') {
+    url.searchParams.set('sortOrder', sortOrder);
+  } else {
+    url.searchParams.delete('sortOrder');
+  }
+  
+  // Update URL without page reload
+  window.history.replaceState({}, '', url.toString());
+};
+
+// Watch for filter and sort changes to update URL
+watch([() => taskStore.filter, () => taskStore.sortBy, () => taskStore.sortOrder], 
+  ([newFilter, newSortBy, newSortOrder]) => {
+    updateURL(newFilter, newSortBy, newSortOrder);
+  }
+);
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown);
