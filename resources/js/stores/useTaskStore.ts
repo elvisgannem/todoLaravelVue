@@ -177,8 +177,9 @@ export const useTaskStore = defineStore('tasks', () => {
       const taskIndex = tasks.value.findIndex(task => task.id === taskId);
       if (taskIndex !== -1) {
         const originalTask = { ...tasks.value[taskIndex] };
-        // Don't update categories in optimistic update since we don't have the full category objects
-        const { categories, ...updateData } = taskData;
+        // For optimistic update, we only update the fields we have, excluding categories
+        const updateData = { ...taskData };
+        delete updateData.categories;
         tasks.value[taskIndex] = { ...originalTask, ...updateData, updated_at: new Date().toISOString() };
 
         // Make server request
