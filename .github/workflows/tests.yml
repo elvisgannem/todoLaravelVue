@@ -48,6 +48,13 @@ jobs:
 
       - name: Run Database Migrations
         run: php artisan migrate --force
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+          DB_HOST: ""
+          DB_PORT: ""
+          DB_USERNAME: ""
+          DB_PASSWORD: ""
 
       - name: Publish Ziggy Configuration
         run: php artisan ziggy:generate
@@ -57,3 +64,10 @@ jobs:
 
       - name: Tests
         run: ./vendor/bin/pest
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+          DB_HOST: ""
+          DB_PORT: ""
+          DB_USERNAME: ""
+          DB_PASSWORD: ""
