@@ -1,0 +1,394 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Todo Laravel Vue API",
+        "description": "A comprehensive task management API built with Laravel and Vue.js",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Web Server"
+        }
+    ],
+    "paths": {
+        "/tasks": {
+            "post": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Create a new task",
+                "description": "Creates a new task for the authenticated user",
+                "operationId": "9b481c0ed5fdfa1a592d70ba39a348ee",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "priority"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Complete project documentation"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Write comprehensive documentation for the todo application",
+                                        "nullable": true
+                                    },
+                                    "priority": {
+                                        "description": "1=Low, 2=Medium, 3=High",
+                                        "type": "integer",
+                                        "enum": [
+                                            1,
+                                            2,
+                                            3
+                                        ],
+                                        "example": 2
+                                    },
+                                    "due_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-31",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Task created successfully, redirects back",
+                        "headers": {
+                            "Location": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "title": [
+                                                    "The title field is required."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/tasks/{task}": {
+            "delete": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Delete a task",
+                "description": "Deletes a task owned by the authenticated user",
+                "operationId": "2e76d38ee629d5be516c498ed02ff818",
+                "parameters": [
+                    {
+                        "name": "task",
+                        "in": "path",
+                        "description": "Task ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Task deleted successfully, redirects back"
+                    },
+                    "403": {
+                        "description": "Forbidden - Task does not belong to user"
+                    },
+                    "404": {
+                        "description": "Task not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Update an existing task",
+                "description": "Updates a task owned by the authenticated user",
+                "operationId": "dec60ca49128964175af38d1bf901e44",
+                "parameters": [
+                    {
+                        "name": "task",
+                        "in": "path",
+                        "description": "Task ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "priority"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Updated task title"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated task description",
+                                        "nullable": true
+                                    },
+                                    "priority": {
+                                        "description": "1=Low, 2=Medium, 3=High",
+                                        "type": "integer",
+                                        "enum": [
+                                            1,
+                                            2,
+                                            3
+                                        ],
+                                        "example": 3
+                                    },
+                                    "due_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-15",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Task updated successfully, redirects back"
+                    },
+                    "403": {
+                        "description": "Forbidden - Task does not belong to user"
+                    },
+                    "404": {
+                        "description": "Task not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/tasks/{task}/toggle": {
+            "patch": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Toggle task completion status",
+                "description": "Toggles the completion status of a task (completed/incomplete)",
+                "operationId": "a34665782f43b9d453b78b3473ded232",
+                "parameters": [
+                    {
+                        "name": "task",
+                        "in": "path",
+                        "description": "Task ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Task completion status toggled successfully, redirects back"
+                    },
+                    "403": {
+                        "description": "Forbidden - Task does not belong to user"
+                    },
+                    "404": {
+                        "description": "Task not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ValidationError": {
+                "title": "Validation Error",
+                "description": "Validation error response",
+                "required": [
+                    "message",
+                    "errors"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": {
+                            "title": [
+                                "The title field is required."
+                            ],
+                            "priority": [
+                                "The priority field must be one of: 1, 2, 3."
+                            ]
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Error": {
+                "title": "Error",
+                "description": "Generic error response",
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "An error occurred"
+                    }
+                },
+                "type": "object"
+            },
+            "Task": {
+                "title": "Task",
+                "description": "Task model",
+                "required": [
+                    "id",
+                    "title",
+                    "completed",
+                    "priority",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Complete project documentation"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Write comprehensive documentation for the todo application",
+                        "nullable": true
+                    },
+                    "completed": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "priority": {
+                        "description": "1=Low, 2=Medium, 3=High",
+                        "type": "integer",
+                        "enum": [
+                            1,
+                            2,
+                            3
+                        ],
+                        "example": 2
+                    },
+                    "due_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-12-31",
+                        "nullable": true
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-08-07T14:30:00Z",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-08-07T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-08-07T14:30:00Z"
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Tasks",
+            "description": "Tasks"
+        }
+    ]
+}
