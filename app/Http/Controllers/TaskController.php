@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Priority;
+use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 use OpenApi\Attributes as OA;
 
 class TaskController extends Controller
@@ -66,16 +69,9 @@ class TaskController extends Controller
         response: 401,
         description: 'Unauthenticated'
     )]
-    public function store(Request $request): RedirectResponse
+    public function store(StoreTaskRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'priority' => ['required', Rule::enum(Priority::class)],
-            'due_date' => 'nullable|date',
-            'categories' => 'nullable|array',
-            'categories.*' => 'exists:categories,id',
-        ]);
+        $validated = $request->validated();
 
         $categories = $validated['categories'] ?? [];
         unset($validated['categories']);
@@ -141,19 +137,12 @@ class TaskController extends Controller
         response: 422,
         description: 'Validation error'
     )]
-    public function update(Request $request, Task $task): RedirectResponse
+    public function update(UpdateTaskRequest $request, Task $task): RedirectResponse
     {
         // Ensure the task belongs to the authenticated user
         $this->authorize('update', $task);
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'priority' => ['required', Rule::enum(Priority::class)],
-            'due_date' => 'nullable|date',
-            'categories' => 'nullable|array',
-            'categories.*' => 'exists:categories,id',
-        ]);
+        $validated = $request->validated();
 
         $categories = $validated['categories'] ?? [];
         unset($validated['categories']);
@@ -197,6 +186,7 @@ class TaskController extends Controller
     )]
     public function toggleComplete(Task $task): RedirectResponse
     {
+        // Ensure the task belongs to the authenticated user
         $this->authorize('update', $task);
 
         if ($task->completed) {
@@ -204,7 +194,7 @@ class TaskController extends Controller
             $message = 'Task marked as incomplete!';
         } else {
             $task->markAsCompleted();
-            $message = 'Task completed!';
+            $message = 'Task marked as completed!';
         }
 
         return back()->with('success', $message);
@@ -238,6 +228,7 @@ class TaskController extends Controller
     )]
     public function destroy(Task $task): RedirectResponse
     {
+        // Ensure the task belongs to the authenticated user
         $this->authorize('delete', $task);
 
         $task->delete();

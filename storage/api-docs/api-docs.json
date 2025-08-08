@@ -13,34 +13,6 @@
     ],
     "paths": {
         "/categories": {
-            "get": {
-                "tags": [
-                    "Categories"
-                ],
-                "summary": "Get all categories for the authenticated user",
-                "description": "Retrieves all categories belonging to the authenticated user",
-                "operationId": "ead5fb1cf2a7453acb2e37928a1b1eaf",
-                "responses": {
-                    "200": {
-                        "description": "Categories retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Category"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "session": []
-                    }
-                ]
-            },
             "post": {
                 "tags": [
                     "Categories"
@@ -54,7 +26,8 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "name"
+                                    "name",
+                                    "color"
                                 ],
                                 "properties": {
                                     "name": {
@@ -85,6 +58,9 @@
                     },
                     "422": {
                         "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -95,13 +71,49 @@
             }
         },
         "/categories/{category}": {
-            "put": {
+            "delete": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Delete a category",
+                "description": "Deletes a category owned by the authenticated user. Tasks in this category will not be deleted.",
+                "operationId": "230b7cb656677a24caa0012ba818db7f",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "Category ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Category deleted successfully, redirects back"
+                    },
+                    "403": {
+                        "description": "Forbidden - Category does not belong to user"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                },
+                "security": [
+                    {
+                        "session": []
+                    }
+                ]
+            },
+            "patch": {
                 "tags": [
                     "Categories"
                 ],
                 "summary": "Update an existing category",
                 "description": "Updates a category owned by the authenticated user",
-                "operationId": "aa81849cd52cf239bdc7bb58f7653c56",
+                "operationId": "01d3c61b2eea33a27b0cd17d6a7abaae",
                 "parameters": [
                     {
                         "name": "category",
@@ -119,9 +131,6 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "name"
-                                ],
                                 "properties": {
                                     "name": {
                                         "type": "string",
@@ -153,42 +162,9 @@
                     },
                     "404": {
                         "description": "Category not found"
-                    }
-                },
-                "security": [
-                    {
-                        "session": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Categories"
-                ],
-                "summary": "Delete a category",
-                "description": "Deletes a category owned by the authenticated user. Tasks in this category will not be deleted.",
-                "operationId": "230b7cb656677a24caa0012ba818db7f",
-                "parameters": [
-                    {
-                        "name": "category",
-                        "in": "path",
-                        "description": "Category ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "302": {
-                        "description": "Category deleted successfully, redirects back"
                     },
-                    "403": {
-                        "description": "Forbidden - Category does not belong to user"
-                    },
-                    "404": {
-                        "description": "Category not found"
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
