@@ -103,7 +103,7 @@
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "session": []
                     }
                 ]
             }
@@ -141,7 +141,7 @@
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "session": []
                     }
                 ]
             },
@@ -222,7 +222,7 @@
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "session": []
                     }
                 ]
             }
@@ -260,7 +260,7 @@
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "session": []
                     }
                 ]
             }
@@ -378,10 +378,10 @@
             }
         },
         "securitySchemes": {
-            "sanctum": {
-                "type": "http",
-                "bearerFormat": "JWT",
-                "scheme": "bearer"
+            "session": {
+                "type": "apiKey",
+                "name": "laravel_session",
+                "in": "cookie"
             }
         }
     },

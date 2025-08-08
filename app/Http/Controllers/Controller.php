@@ -14,10 +14,10 @@ use OpenApi\Attributes as OA;
     description: 'Web Server'
 )]
 #[OA\SecurityScheme(
-    securityScheme: 'sanctum',
-    type: 'http',
-    scheme: 'bearer',
-    bearerFormat: 'JWT'
+    securityScheme: 'session',
+    type: 'apiKey',
+    in: 'cookie',
+    name: 'laravel_session'
 )]
 abstract class Controller
 {

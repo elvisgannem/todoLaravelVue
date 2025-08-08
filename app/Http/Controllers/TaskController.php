@@ -18,7 +18,7 @@ class TaskController extends Controller
         path: '/tasks',
         summary: 'Create a new task',
         description: 'Creates a new task for the authenticated user',
-        security: [['sanctum' => []]],
+        security: [['session' => []]],
         tags: ['Tasks']
     )]
     #[OA\RequestBody(
@@ -76,7 +76,7 @@ class TaskController extends Controller
         path: '/tasks/{task}',
         summary: 'Update an existing task',
         description: 'Updates a task owned by the authenticated user',
-        security: [['sanctum' => []]],
+        security: [['session' => []]],
         tags: ['Tasks']
     )]
     #[OA\Parameter(
@@ -135,7 +135,7 @@ class TaskController extends Controller
         path: '/tasks/{task}/toggle',
         summary: 'Toggle task completion status',
         description: 'Toggles the completion status of a task (completed/incomplete)',
-        security: [['sanctum' => []]],
+        security: [['session' => []]],
         tags: ['Tasks']
     )]
     #[OA\Parameter(
@@ -176,7 +176,7 @@ class TaskController extends Controller
         path: '/tasks/{task}',
         summary: 'Delete a task',
         description: 'Deletes a task owned by the authenticated user',
-        security: [['sanctum' => []]],
+        security: [['session' => []]],
         tags: ['Tasks']
     )]
     #[OA\Parameter(
