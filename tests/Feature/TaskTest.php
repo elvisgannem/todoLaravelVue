@@ -195,7 +195,7 @@ describe('Task Management', function () {
                 ->patch("/tasks/{$task->id}/toggle");
 
             $response->assertRedirect('/');
-            $response->assertSessionHas('success', 'Task completed!');
+            $response->assertSessionHas('success', 'Task marked as completed!');
 
             $task->refresh();
             $this->assertTrue($task->completed);
