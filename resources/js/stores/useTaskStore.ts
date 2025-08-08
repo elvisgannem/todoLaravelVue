@@ -13,6 +13,18 @@ interface Task {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  categories: Category[];
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  color: string;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface PriorityOption {
@@ -110,6 +122,7 @@ export const useTaskStore = defineStore('tasks', () => {
     description?: string;
     priority: number;
     due_date?: string;
+    categories?: number[];
   }) => {
     try {
       appStore.setLoading(true);
@@ -125,6 +138,7 @@ export const useTaskStore = defineStore('tasks', () => {
         completed_at: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        categories: [],
       };
 
       tasks.value.unshift(optimisticTask);
@@ -155,7 +169,7 @@ export const useTaskStore = defineStore('tasks', () => {
     }
   };
 
-  const updateTask = async (taskId: number, taskData: Partial<Task>) => {
+  const updateTask = async (taskId: number, taskData: any) => {
     try {
       appStore.setLoading(true);
 
@@ -163,7 +177,9 @@ export const useTaskStore = defineStore('tasks', () => {
       const taskIndex = tasks.value.findIndex(task => task.id === taskId);
       if (taskIndex !== -1) {
         const originalTask = { ...tasks.value[taskIndex] };
-        tasks.value[taskIndex] = { ...originalTask, ...taskData, updated_at: new Date().toISOString() };
+        // Don't update categories in optimistic update since we don't have the full category objects
+        const { categories, ...updateData } = taskData;
+        tasks.value[taskIndex] = { ...originalTask, ...updateData, updated_at: new Date().toISOString() };
 
         // Make server request
         await new Promise<void>((resolve, reject) => {

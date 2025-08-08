@@ -441,7 +441,7 @@ const submitTask = async () => {
   }
 };
 
-const handleUpdateTask = async (task: Task, data: Partial<Task>) => {
+const handleUpdateTask = async (task: Task, data: any) => {
   await taskStore.updateTask(task.id, data);
 };
 

@@ -53,6 +53,21 @@
               <span v-if="isOverdue(task)" class="text-red-500 font-medium">(Overdue)</span>
             </span>
 
+            <!-- Categories -->
+            <div v-if="task.categories && task.categories.length > 0" class="flex items-center gap-1 flex-wrap">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              <span
+                v-for="category in task.categories"
+                :key="category.id"
+                class="px-2 py-1 rounded-full text-xs font-medium"
+                :style="{ backgroundColor: category.color + '20', color: category.color, border: '1px solid ' + category.color + '40' }"
+              >
+                {{ category.name }}
+              </span>
+            </div>
+
             <!-- Completion Date -->
             <span v-if="task.completed_at" class="flex items-center gap-1 text-green-600">
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,6 +157,30 @@
           </div>
         </div>
 
+        <div>
+          <Label class="mb-2 block">Categories</Label>
+          <div class="space-y-2">
+            <label
+              v-for="category in categories"
+              :key="category.id"
+              class="flex items-center gap-2 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                :value="category.id"
+                v-model="editForm.categories"
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <span
+                class="px-2 py-1 rounded-full text-xs font-medium"
+                :style="{ backgroundColor: category.color + '20', color: category.color, border: '1px solid ' + category.color + '40' }"
+              >
+                {{ category.name }}
+              </span>
+            </label>
+          </div>
+        </div>
+
         <div class="flex justify-end gap-2">
           <Button type="button" variant="outline" @click="cancelEdit">
             Cancel
@@ -198,6 +237,14 @@ interface Category {
   updated_at: string;
 }
 
+interface EditFormData {
+  title: string;
+  description: string;
+  priority: number;
+  due_date: string;
+  categories: number[];
+}
+
 const props = defineProps<{
   task: Task;
   categories: Category[];
@@ -205,7 +252,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   toggleComplete: [taskId: number];
-  update: [task: Task, data: Partial<Task>];
+  update: [task: Task, data: EditFormData];
   delete: [task: Task];
 }>();
 
@@ -215,11 +262,12 @@ const isEditing = ref(false);
 const showDeleteModal = ref(false);
 const isDeleting = ref(false);
 
-const editForm = ref({
+const editForm = ref<EditFormData>({
   title: '',
   description: '',
   priority: 1,
   due_date: '',
+  categories: [],
 });
 
 const toggleEdit = () => {
@@ -229,6 +277,7 @@ const toggleEdit = () => {
     description: props.task.description || '',
     priority: props.task.priority,
     due_date: props.task.due_date || '',
+    categories: props.task.categories.map(cat => cat.id),
   };
 };
 
