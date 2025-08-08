@@ -76,7 +76,7 @@
           </button>
 
           <button
-            @click="$emit('delete', task)"
+            @click="showDeleteModal = true"
             class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
             title="Delete task"
           >
@@ -153,6 +153,17 @@
       </form>
     </div>
   </div>
+
+  <!-- Delete Confirmation Modal -->
+  <ConfirmationModal
+    v-model:open="showDeleteModal"
+    title="Delete Task"
+    :description="`Are you sure you want to delete '${task.title}'? This action cannot be undone.`"
+    confirm-text="Delete Task"
+    :loading="isDeleting"
+    @confirm="handleDelete"
+    @cancel="showDeleteModal = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -160,6 +171,7 @@ import { ref } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { useTaskStore } from '@/stores';
 
 interface Task {
@@ -189,6 +201,9 @@ const emit = defineEmits<{
 const taskStore = useTaskStore();
 
 const isEditing = ref(false);
+const showDeleteModal = ref(false);
+const isDeleting = ref(false);
+
 const editForm = ref({
   title: '',
   description: '',
@@ -213,6 +228,16 @@ const cancelEdit = () => {
 const submitEdit = () => {
   emit('update', props.task, editForm.value);
   isEditing.value = false;
+};
+
+const handleDelete = async () => {
+  isDeleting.value = true;
+  try {
+    emit('delete', props.task);
+    showDeleteModal.value = false;
+  } finally {
+    isDeleting.value = false;
+  }
 };
 
 const getPriorityLabel = (priority: number): string => {

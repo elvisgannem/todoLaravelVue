@@ -336,8 +336,6 @@ const handleUpdateTask = async (task: Task, data: Partial<Task>) => {
 };
 
 const handleDeleteTask = async (task: Task) => {
-  if (confirm('Are you sure you want to delete this task?')) {
-    await taskStore.deleteTask(task.id);
-  }
+  await taskStore.deleteTask(task.id);
 };
 </script>
