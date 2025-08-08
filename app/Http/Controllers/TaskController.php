@@ -29,7 +29,15 @@ class TaskController extends Controller
                 new OA\Property(property: 'title', type: 'string', maxLength: 255, example: 'Complete project documentation'),
                 new OA\Property(property: 'description', type: 'string', nullable: true, example: 'Write comprehensive documentation for the todo application'),
                 new OA\Property(property: 'priority', type: 'integer', enum: [1, 2, 3], example: 2, description: '1=Low, 2=Medium, 3=High'),
-                new OA\Property(property: 'due_date', type: 'string', format: 'date', nullable: true, example: '2024-12-31')
+                new OA\Property(property: 'due_date', type: 'string', format: 'date', nullable: true, example: '2024-12-31'),
+                new OA\Property(
+                    property: 'categories',
+                    type: 'array',
+                    items: new OA\Items(type: 'integer'),
+                    nullable: true,
+                    example: [1, 2],
+                    description: 'Array of category IDs to associate with the task'
+                )
             ]
         )
     )]
@@ -65,9 +73,20 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'priority' => ['required', Rule::enum(Priority::class)],
             'due_date' => 'nullable|date',
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id',
         ]);
 
-        $request->user()->tasks()->create($validated);
+        $categories = $validated['categories'] ?? [];
+        unset($validated['categories']);
+
+        $task = $request->user()->tasks()->create($validated);
+        
+        // Sync categories (only attach categories that belong to the user)
+        if (!empty($categories)) {
+            $userCategoryIds = $request->user()->categories()->whereIn('id', $categories)->pluck('id');
+            $task->categories()->sync($userCategoryIds);
+        }
 
         return back()->with('success', 'Task created successfully!');
     }
@@ -94,7 +113,15 @@ class TaskController extends Controller
                 new OA\Property(property: 'title', type: 'string', maxLength: 255, example: 'Updated task title'),
                 new OA\Property(property: 'description', type: 'string', nullable: true, example: 'Updated task description'),
                 new OA\Property(property: 'priority', type: 'integer', enum: [1, 2, 3], example: 3, description: '1=Low, 2=Medium, 3=High'),
-                new OA\Property(property: 'due_date', type: 'string', format: 'date', nullable: true, example: '2025-01-15')
+                new OA\Property(property: 'due_date', type: 'string', format: 'date', nullable: true, example: '2025-01-15'),
+                new OA\Property(
+                    property: 'categories',
+                    type: 'array',
+                    items: new OA\Items(type: 'integer'),
+                    nullable: true,
+                    example: [1, 3],
+                    description: 'Array of category IDs to associate with the task'
+                )
             ]
         )
     )]
@@ -124,9 +151,20 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'priority' => ['required', Rule::enum(Priority::class)],
             'due_date' => 'nullable|date',
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id',
         ]);
 
+        $categories = $validated['categories'] ?? [];
+        unset($validated['categories']);
+
         $task->update($validated);
+        
+        // Sync categories (only attach categories that belong to the user)
+        if (array_key_exists('categories', $request->all())) {
+            $userCategoryIds = $request->user()->categories()->whereIn('id', $categories)->pluck('id');
+            $task->categories()->sync($userCategoryIds);
+        }
 
         return back()->with('success', 'Task updated successfully!');
     }

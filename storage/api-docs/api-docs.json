@@ -12,6 +12,192 @@
         }
     ],
     "paths": {
+        "/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get all categories for the authenticated user",
+                "description": "Retrieves all categories belonging to the authenticated user",
+                "operationId": "ead5fb1cf2a7453acb2e37928a1b1eaf",
+                "responses": {
+                    "200": {
+                        "description": "Categories retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Category"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "session": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Create a new category",
+                "description": "Creates a new category for the authenticated user",
+                "operationId": "bb02f0320882db37f99574196577e446",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Work"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Work related tasks",
+                                        "nullable": true
+                                    },
+                                    "color": {
+                                        "description": "Hex color code",
+                                        "type": "string",
+                                        "pattern": "^#[0-9A-Fa-f]{6}$",
+                                        "example": "#3B82F6"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Category created successfully, redirects back"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "session": []
+                    }
+                ]
+            }
+        },
+        "/categories/{category}": {
+            "put": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Update an existing category",
+                "description": "Updates a category owned by the authenticated user",
+                "operationId": "aa81849cd52cf239bdc7bb58f7653c56",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "Category ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Personal"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Personal tasks and reminders",
+                                        "nullable": true
+                                    },
+                                    "color": {
+                                        "type": "string",
+                                        "pattern": "^#[0-9A-Fa-f]{6}$",
+                                        "example": "#10B981"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Category updated successfully, redirects back"
+                    },
+                    "403": {
+                        "description": "Forbidden - Category does not belong to user"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                },
+                "security": [
+                    {
+                        "session": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Delete a category",
+                "description": "Deletes a category owned by the authenticated user. Tasks in this category will not be deleted.",
+                "operationId": "230b7cb656677a24caa0012ba818db7f",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "Category ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Category deleted successfully, redirects back"
+                    },
+                    "403": {
+                        "description": "Forbidden - Category does not belong to user"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                },
+                "security": [
+                    {
+                        "session": []
+                    }
+                ]
+            }
+        },
         "/tasks": {
             "post": {
                 "tags": [
@@ -54,6 +240,18 @@
                                         "type": "string",
                                         "format": "date",
                                         "example": "2024-12-31",
+                                        "nullable": true
+                                    },
+                                    "categories": {
+                                        "description": "Array of category IDs to associate with the task",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2
+                                        ],
                                         "nullable": true
                                     }
                                 },
@@ -199,6 +397,18 @@
                                         "format": "date",
                                         "example": "2025-01-15",
                                         "nullable": true
+                                    },
+                                    "categories": {
+                                        "description": "Array of category IDs to associate with the task",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            3
+                                        ],
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -268,6 +478,63 @@
     },
     "components": {
         "schemas": {
+            "Category": {
+                "title": "Category",
+                "description": "Task category model",
+                "required": [
+                    "id",
+                    "name",
+                    "slug",
+                    "color",
+                    "user_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Work"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "work"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Work related tasks and projects",
+                        "nullable": true
+                    },
+                    "color": {
+                        "description": "Hex color code for UI display",
+                        "type": "string",
+                        "example": "#3B82F6"
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "tasks_count": {
+                        "description": "Number of tasks in this category",
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-08-07T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-08-07T14:30:00Z"
+                    }
+                },
+                "type": "object"
+            },
             "ValidationError": {
                 "title": "Validation Error",
                 "description": "Validation error response",
@@ -386,6 +653,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Categories",
+            "description": "Categories"
+        },
         {
             "name": "Tasks",
             "description": "Tasks"

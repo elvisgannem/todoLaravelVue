@@ -116,6 +116,41 @@
             />
             <InputError :message="formErrors.due_date" />
           </div>
+
+          <div>
+            <Label class="mb-2 block">Categories (Optional)</Label>
+            <div class="space-y-2 max-h-32 overflow-y-auto">
+              <div 
+                v-for="category in categories" 
+                :key="category.id"
+                class="flex items-center space-x-2"
+              >
+                <input
+                  :id="`category-${category.id}`"
+                  v-model="form.categories"
+                  :value="category.id"
+                  type="checkbox"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                />
+                <label 
+                  :for="`category-${category.id}`"
+                  class="flex items-center space-x-2 cursor-pointer"
+                >
+                  <span 
+                    class="w-3 h-3 rounded-full" 
+                    :style="{ backgroundColor: category.color }"
+                  ></span>
+                  <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    {{ category.name }}
+                  </span>
+                </label>
+              </div>
+            </div>
+            <p v-if="categories.length === 0" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              No categories available. Create categories first to organize your tasks.
+            </p>
+            <InputError :message="formErrors.categories" />
+          </div>
         </div>
 
             <div class="flex justify-end">
@@ -219,6 +254,7 @@
           v-for="task in taskStore.filteredTasks"
           :key="task.id"
           :task="task"
+          :categories="categories"
           @toggle-complete="taskStore.toggleTaskComplete"
           @update="handleUpdateTask"
           @delete="handleDeleteTask"
@@ -247,6 +283,18 @@ interface Task {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  categories: Category[];
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  color: string;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface PriorityOption {
@@ -256,6 +304,7 @@ interface PriorityOption {
 
 const props = defineProps<{
   tasks: Task[];
+  categories: Category[];
   priorityOptions: PriorityOption[];
 }>();
 
@@ -356,6 +405,7 @@ const form = ref({
   description: '',
   priority: 1, // Default to Low priority
   due_date: '',
+  categories: [] as number[],
 });
 
 const formErrors = ref<{[key: string]: string}>({});
@@ -374,6 +424,7 @@ const submitTask = async () => {
       description: form.value.description || undefined,
       priority: form.value.priority,
       due_date: form.value.due_date || undefined,
+      categories: form.value.categories,
     });
     
     // Reset form and close the form
@@ -382,6 +433,7 @@ const submitTask = async () => {
       description: '',
       priority: 1,
       due_date: '',
+      categories: [],
     };
     isAddFormOpen.value = false;
   } catch (error) {

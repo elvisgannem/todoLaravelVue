@@ -15,6 +15,18 @@ interface Task {
     completed_at: string | null;
     created_at: string;
     updated_at: string;
+    categories: Category[];
+}
+
+interface Category {
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+    color: string;
+    user_id: number;
+    created_at: string;
+    updated_at: string;
 }
 
 interface PriorityOption {
@@ -24,6 +36,7 @@ interface PriorityOption {
 
 defineProps<{
     tasks: Task[];
+    categories: Category[];
     priorityOptions: PriorityOption[];
 }>();
 
@@ -41,7 +54,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
             <!-- Todo List -->
-            <TodoList :tasks="tasks" :priority-options="priorityOptions" />
+            <TodoList :tasks="tasks" :categories="categories" :priority-options="priorityOptions" />
         </div>
 
         <!-- Notification Toast Component -->

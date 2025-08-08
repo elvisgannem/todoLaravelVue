@@ -184,12 +184,23 @@ interface Task {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  categories: Category[];
 }
 
-
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  color: string;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+}
 
 const props = defineProps<{
   task: Task;
+  categories: Category[];
 }>();
 
 const emit = defineEmits<{

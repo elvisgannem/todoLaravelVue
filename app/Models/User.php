@@ -66,4 +66,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Task::class)->overdue();
     }
+
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class);
+    }
 }

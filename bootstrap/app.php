@@ -16,12 +16,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
-        // Exclude Swagger routes and task endpoints from CSRF verification
+        // Exclude Swagger routes and API endpoints from CSRF verification
         $middleware->validateCsrfTokens(except: [
             'api/documentation',
             'api/documentation/*',
             'tasks',
             'tasks/*',
+            'categories',
+            'categories/*',
         ]);
 
         $middleware->web(append: [
